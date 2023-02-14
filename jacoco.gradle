@@ -1,0 +1,27 @@
+apply plugin: 'jacoco'
+
+task createTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest']) {
+    group = "Reporting"
+
+    reports {
+        xml.enabled  true
+        html.enabled  true
+    }
+
+    def fileFilter = ['**/R.class',
+                      '**/R$*.class',
+                      '**/BuildConfig.*',
+                      '**/*$ViewInjector*.*',
+                      '**/*$ViewBinder*.*',
+                      '**/*$MembersInjector*.*',
+                      '**/Manifest*.*',
+                      '**/*Test*.*',
+                      'android/**/*.*']
+    def debugTree = fileTree(dir: "${buildDir}/intermediates/javac/debug/classes", excludes: fileFilter)
+    def mainSrc = "${project.projectDir}/src/main/java"
+    def kotlinTree = fileTree(dir: "$project.buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
+
+    sourceDirectories.from = files([mainSrc])
+    classDirectories.from = files([debugTree,kotlinTree])
+    executionData.from = files("${project.buildDir}/jacoco/testDebugUnitTest.exec")
+}
